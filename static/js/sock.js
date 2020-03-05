@@ -2,6 +2,7 @@ let tab = new Array(9);
 for(let aa=0; aa<tab.length;aa++){
     tab[aa]=0;
 }
+let role = 'x';
 
 
 window.onload = function(){
@@ -24,8 +25,29 @@ function iniciar(event){
 
     socket.on('most', function(msj) {
   	console.log(msj);
-            console.log('message');
+            console.log('msj');
         });
+
+    socket.on('player_move', function(msj) {
+  	
+            console.log('usuario debe seleccionar');
+        });
+
+
+    socket.on('player_wait', function(msj) {
+  	
+            console.log('disable items');
+        });
+
+    socket.on('update_board', function(msj) {
+	
+        console.log('actualiza tablero');
+    });
+
+    socket.on('define_role', function(msj) {
+    	role=msj['data']
+        console.log('actualiza rol');
+    });
 
 
 	function movimiento(event){
@@ -69,7 +91,7 @@ document.getElementById("block_9").addEventListener("click",movimiento);
 
 
 
-	
+
 
 }
 
