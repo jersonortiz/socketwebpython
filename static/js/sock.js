@@ -1,102 +1,120 @@
 let tab = new Array(9);
 for(let aa=0; aa<tab.length;aa++){
-    tab[aa]=0;
+	tab[aa]=0;
 }
 let role = 'x';
 
-
 window.onload = function(){
-document.getElementById("gamebutton").addEventListener("click",iniciar);
+	document.getElementById("gamebutton").addEventListener("click",iniciar);
 
-var socket=null;
+	var socket=null;
+
+	function iniciar(event){
+
+		socket = io.connect('http://localhost:5000/');
+		socket.on('connect', function() {
+
+		console.log('Connect');
+		});
+
+		socket.on('message', function(msj) {
+			console.log(msj);
+			console.log('message');
+		});
+
+		socket.on('most', function(msj) {
+			console.log(msj);
+			console.log('msj');
+		});
+
+		socket.on('player_move', function(msj) {
+			celdasEnable(true);
+			console.log('usuario debe seleccionar');
+		});
+
+		socket.on('player_wait', function(msj) {
+			celdasEnable(false);
+			console.log('disable items');
+		});
+
+		socket.on('update_board', function(msj) {
+
+			board = msj['data'].split('|');
+
+			let celdas=document.getElementsByName('celda');
+
+			for (var i = celdas.length - 1; i >= 0; i--) {
+				if (board[i]==='O'){
+					board[i].innerHTML = '<ion-icon name="close-outline"></ion-icon>';
+					tab[i]=1;
+
+				} else if(board[i]==='X'){
+					board[i].innerHTML = '<ion-icon name="close-outline"></ion-icon>';
+					tab[i]=1;
+				}
+			}
+
+			console.log('actualiza tablero');
+		});
+
+		socket.on('define_role', function(msj) {
+			role=msj['data'];
+			console.log('actualiza rol: '+role);
+		});
+
+		socket.on('result', function(msj) {
+			switch(msj['data']){
+
+				case 'win':
+				break;
+				case 'lose':
+				break;
+				case 'draw':
+				break;
+			}
+			socket.close()
+		});
 
 
 
-function iniciar(event){
-	socket = io.connect('http://localhost:5000');
- socket.on('connect', function() {
-            console.log('Connect');
-        });
+		function movimiento(event){
+			console.log("marcar")
 
-  socket.on('message', function(msj) {
-  	console.log(msj);
-            console.log('message');
-        });
+			let idele = event.target.id
 
-    socket.on('most', function(msj) {
-  	console.log(msj);
-            console.log('msj');
-        });
-
-    socket.on('player_move', function(msj) {
-  	
-            console.log('usuario debe seleccionar');
-        });
+			let va = idele.split("_");
+			let val = va[1];
+			console.log(tab);
 
 
-    socket.on('player_wait', function(msj) {
-  	
-            console.log('disable items');
-        });
+			if(tab[val]===0){
 
-    socket.on('update_board', function(msj) {
-	
-        console.log('actualiza tablero');
-    });
+				socket.emit('player_move', {'data':val});
+				let ele = document.getElementById('idele');
 
-    socket.on('define_role', function(msj) {
-    	role=msj['data']
-        console.log('actualiza rol');
-    });
+				if(role==='X'){
+					ele-innerHTML = '<ion-icon name="close-outline"></ion-icon>';
+				}	else {
+					innerHTML = '<ion-icon name="close-outline"></ion-icon>';
+				}
+				tab[val]=1;	      
+			} 
+		}
 
+		celdasEnable(true);
 
-	function movimiento(event){
-		console.log("marcar")
-	  
-	    let idele = event.target.id
-
-	    let va = idele.split("_");
-	    let val = va[1];
-	    console.log(tab);
-
-	    if(tab[val]===0){
-
-	    	socket.emit('message', {'nombre':'pepe'});
-
-
-	        let ele = document.getElementById(idele);
-	        console.log(val);
-	        ele.innerHTML = '<ion-icon name="close-outline"></ion-icon>';
-	        tab[val]=1;
-	        let data = {posicion : val}
-	        let heads = new Headers();
-	      
-	   
-	    } 
 	}
 
 
-
-document.getElementById("block_1").addEventListener("click",movimiento);
-document.getElementById("block_2").addEventListener("click",movimiento);
-document.getElementById("block_3").addEventListener("click",movimiento);
-document.getElementById("block_4").addEventListener("click",movimiento);
-document.getElementById("block_5").addEventListener("click",movimiento);
-document.getElementById("block_6").addEventListener("click",movimiento);
-document.getElementById("block_7").addEventListener("click",movimiento);
-document.getElementById("block_8").addEventListener("click",movimiento);
-document.getElementById("block_9").addEventListener("click",movimiento);
-
-
-
-
-
-
+	function celdasEnable(status){
+		let celdas=document.getElementsByName('celda');
+		for (var i = celdas.length - 1; i >= 0; i--) {
+			if(status){
+				celdas[i].addEventListener('click',movimiento);
+			} else {
+				celdas[i].removeEventListener('click',movimiento)
+			}		
+		}
+	}	
 
 }
-
-}
-
-
-
-
